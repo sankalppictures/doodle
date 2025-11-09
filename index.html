@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SANKALP Search</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #ffffff, #e8f0fe);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background Confetti Canvas */
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    /* LOGO */
+    .logo {
+      font-size: 64px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #4285f4, #ea4335, #fbbc05, #34a853);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 4s ease-in-out infinite;
+      margin-bottom: 40px;
+    }
+
+    @keyframes glow {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(1.8); }
+      100% { filter: brightness(1); }
+    }
+
+    /* SEARCH BOX */
+    .search-box {
+      display: flex;
+      align-items: center;
+      border: 1px solid #dfe1e5;
+      border-radius: 50px;
+      padding: 8px 15px;
+      width: 90%;
+      max-width: 580px;
+      box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+      transition: box-shadow 0.3s ease;
+      background: #fff;
+    }
+
+    .search-box:focus-within {
+      box-shadow: 0 2px 8px rgba(66,133,244,0.3);
+    }
+
+    .search-box svg {
+      color: #5f6368;
+      margin-right: 10px;
+    }
+
+    .search-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      padding: 8px;
+      background: transparent;
+      color: #202124;
+    }
+
+    .search-box button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    .search-box button:hover {
+      background: #f1f3f4;
+    }
+
+    /* LOADER */
+    .loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, #0d1117 10%, #000000 90%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .loader.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .loader h2 {
+      color: #00ffff;
+      font-size: 30px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 20px;
+      animation: blink 1s infinite alternate;
+    }
+
+    @keyframes blink {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      .logo { font-size: 42px; margin-bottom: 25px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="rain"></canvas>
+
+  <h1 class="logo">SANKALP</h1>
+
+  <form class="search-box" onsubmit="return showLoader(event)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 
+      9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 
+      4.23-1.57l.27.28v.79l5 4.99L20.49 
+      19l-4.99-5zM10 15a5 5 0 110-10 5 5 
+      0 010 10z"/>
+    </svg>
+    <input type="search" id="query" placeholder="Search with Sankalp..." autocomplete="off" />
+    <button type="submit" aria-label="Search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 
+        0016 9.5 6.5 6.5 0 109.5 16c1.61 0 
+        3.09-.59 4.23-1.57l.27.28v.79l5 
+        4.99L20.49 19l-4.99-5zM10 15a5 5 
+        0 110-10 5 5 0 010 10z"/>
+      </svg>
+    </button>
+  </form>
+
+  <div class="loader" id="loader">
+    <h2>Thinking...</h2>
+  </div>
+
+  <script>
+    function showLoader(e) {
+      e.preventDefault();
+      const q = document.getElementById('query').value.trim();
+      if (!q) return;
+      const loader = document.getElementById('loader');
+      loader.classList.add('active');
+      setTimeout(() => {
+        window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+      }, 3000);
+    }
+
+    // 🎊 Confetti Rain Animation
+    const canvas = document.getElementById("rain");
+    const ctx = canvas.getContext("2d");
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
+
+    const confetti = [];
+    const colors = ["#fbbc05", "#34a853", "#4285f4", "#ea4335", "#ff66cc", "#00ffff"];
+
+    for (let i = 0; i < 150; i++) {
+      confetti.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 6 + 3,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        s: Math.random() * 3 + 2
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      confetti.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.c;
+        ctx.fill();
+      });
+      update();
+      requestAnimationFrame(draw);
+    }
+
+    function update() {
+      confetti.forEach(p => {
+        p.y += p.s;
+        if (p.y > H) {
+          p.y = -10;
+          p.x = Math.random() * W;
+        }
+      });
+    }
+
+    draw();
+
+    window.addEventListener("resize", () => {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W;
+      canvas.height = H;
+    });
+  </script>
+</body>
+</html>
